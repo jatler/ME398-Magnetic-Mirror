@@ -6,4 +6,4 @@ data_fitting.py contains functions to fit the CMOS pixel intensity data to a 2D 
 
 profile_scan.py contains functions to create a 3D surface profile array from position and slope data using Simpson's Rule.
 
-2D Profile Scan.ipynb performs the profile scan and graphs the output
+2D Profile Scan.ipynb performs the profile scan and graphs the output.
