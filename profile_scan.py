@@ -63,7 +63,3 @@ def profile2d(hx2d,hy2d,x,y):
     print (Iy)
     Ixy = Ix+Iy #- np.min(Ix+Iy)
     return Ixy
-
-
-
-pro
