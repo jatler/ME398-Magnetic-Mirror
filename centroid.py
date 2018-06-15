@@ -14,9 +14,9 @@ def twoD_Gaussian(X, amplitude, xo, yo, sigma_x, sigma_y, theta, offset):
         theta:  rotation angle of the 2D gaussian function
         offset: asymptote distance from y = 0
         
-    Returns:
+    Returns: 
         f.ravel(): 1D array of general 2D gaussian function output at (x,y).
-    """"
+    """
 
     x,y = X
     (xo,yo) = (float(xo),float(yo))
@@ -31,7 +31,7 @@ def twoD_Gaussian(X, amplitude, xo, yo, sigma_x, sigma_y, theta, offset):
                                       + c*((y-yo)**2)))
     return f.ravel()
 
-def centroid(data,plot=0,A=200,x0=640,y0=512,sx=180,sy=150,theta=0,h=5,run=0):
+def centroid(data,plot=0,A=120,sx=50,sy=50,theta=0,h=5,run=0):
     """ Fits a 2D gaussian function to the pixel intensity data received from the CMOS. The fit uses scipy.optimize.curve_fit, which uses non-linear least squares to ft the 2D
     gaussian function to the data.
 
@@ -50,7 +50,10 @@ def centroid(data,plot=0,A=200,x0=640,y0=512,sx=180,sy=150,theta=0,h=5,run=0):
         perr: Fitted 2D gaussian standard deviation values
     """
 
-    initial_guess = (A,x0,y0,sx,sy,theta,h)
+
+    y0, x0 = np.unravel_index(np.argmax(data), data.shape)
+    initial_guess = (A, x0, y0, sx, sy, theta, h)
+
     data = data.ravel()
     x = np.linspace(0, 1279, 1280)
     y = np.linspace(0, 1023, 1024)
@@ -90,16 +93,17 @@ def angles(data,d,w):
 
     size_pixel = 5.2*10**-6 # size of CMOS pixel in m
     # Calculate angle
+    beta = np.pi/2 - np.arctan(d/w)
     x_cmos = (1280 - popt[1])*size_pixel  # facing the sensor, x pixel = 0 on left, 1280 on right
-    y_cmos = (1024 - popt[2])*size_pixel  # facing the sensor, y pixel = 0 on bottom, 1024 on top
-    angle_x = 0.5*(np.arctan((w+x_cmos)/d)
-    angle_y = 0.5*(np.arctan(y_cmos/d))
+    y_cmos = (1024/2 - popt[2])*size_pixel  # facing the sensor, y pixel = 0 on bottom, 1024 on top
+    angle_x = 0.5*((np.arctan((w+x_cmos)/d)) - beta)
+    angle_y = 0.5*(np.arctan(y_cmos/np.sqrt(d**2.+(w+x_cmos)**2.)))
 
     angle_xa = angle_x*180/np.pi*3600  #angle in arcseconds
     angle_ya = angle_y*180/np.pi*3600  #angle in arcseconds
-    return angle_xa, angle_ya
+    return angle_x, angle_y
 
-def slopes(data, d = 2.235, w = 0.914):
+def slopes(data, d = 148.0*10**-3, w = 55.0*10**-3):
     """ Computes the slope of the surface relative to the xz plane from a 1280x1024 array of CMOS light intensity and
     two parameters of the optical bench layout. A 2D gaussian function is fit to the data to find the centroid. The
     centroid location and optical bench geometry are used to find the angle of the surface, which is used to find the
@@ -115,9 +119,7 @@ def slopes(data, d = 2.235, w = 0.914):
         slope_y: Slope of the surface relative to the yz plane
     """
 
-    angle_xa, angle_ya = angles(data, d, w)
-    angle_x = angle_xa*np.pi*3600/180
-    angle_y = angle_ya * np.pi * 3600 / 180
+    angle_x, angle_y = angles(data, d, w)
     slope_x = np.tan(angle_x)
     slope_y = np.tan(angle_y)
 

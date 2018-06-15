@@ -39,7 +39,7 @@ def test2d(xlim=[0,5],ylim=[0,6],num=[6,7]):
     print (Ixy==Ixy1)
 
 
-def profile2d(hx2d,hy2d,x,y):
+def profile2d(dx2d,dy2d,x,y):
     """"" Creates a 3D surface profile array from position and slope data using Simpson's rule.
 
     Args:
@@ -56,10 +56,10 @@ def profile2d(hx2d,hy2d,x,y):
         Ixy: 2D surface profile array. Indices in the array represent xy positions. Values in the array represent
             heights in z.
     """
-    if hx2d.shape == hy2d.shape: num = [len(hx2d[0]),len(hx2d)]
-    Ix = np.array([[simps(hx2d[j][0:i],x[0:i]) for i in range(1,num[0]+1)] for j in range(0,num[1])])
-    print (Ix)
-    Iy = np.transpose([[simps(np.transpose(hy2d)[i][0:j],y[0:j]) for j in range(1,num[1]+1)] for i in range(0,num[0])])
-    print (Iy)
-    Ixy = Ix+Iy #- np.min(Ix+Iy)
+    if dx2d.shape == dy2d.shape: num = [len(dx2d[0]),len(dx2d)] # num = [n_columns, n_rows]
+    Ix = np.array([[simps(dx2d[j][0:i],x[0:i]) for i in range(1,num[0]+1)] for j in range(0,num[1])])
+    Iy = np.transpose([[simps(np.transpose(dy2d)[i][0:j],y[0:j]) for j in range(1,num[1]+1)] for i in range(0,num[0])])
+    Ixy = Ix + Iy
+    #print (Ix)
+    #print (Iy)
     return Ixy
